@@ -17,6 +17,7 @@ const App = () => {
 
     const [coffeeAmount, setCoffeeAmount] = useState(getCookie('coffeeAmount') || '20');
     const [waterAmount, setWaterAmount] = useState(getCookie('waterAmount') || '300');
+    const [ratio, setRatio] = useState(parseFloat(waterAmount) / parseFloat(coffeeAmount));
     const [flavor, setFlavor] = useState(getCookie('flavor') || '標準');
     const [strength, setStrength] = useState(getCookie('strength') || '標準');
     const [brewingSteps, setBrewingSteps] = useState([]);
@@ -100,26 +101,28 @@ const App = () => {
     };
 
     const handleCoffeeAmountChange = (newCoffee: string) => {
-        setCoffeeAmount((prevCoffee) => {
-            if (isLinked) {
-                setWaterAmount((prevWater) => {
-                    return (parseFloat(prevWater) / parseFloat(prevCoffee) * parseFloat(newCoffee)).toFixed(2);
-                });
-            }
-            return newCoffee;
-        });
+        setCoffeeAmount(newCoffee);
+        if (isLinked && newCoffee) {
+            const coffee = parseFloat(newCoffee);
+            setWaterAmount((coffee * ratio).toFixed(2));
+        }
     };
 
     const handleWaterAmountChange = (newWater: string) => {
-        setWaterAmount((prevWater) => {
-            if (isLinked) {
-                setCoffeeAmount((prevCoffee) => {
-                    return (parseFloat(prevCoffee) / parseFloat(prevWater) * parseFloat(newWater)).toFixed(2);
-                });
-            }
-            return newWater;
-        });
+        setWaterAmount(newWater);
+        if (isLinked && newWater) {
+            const water = parseFloat(newWater);
+            setCoffeeAmount((water / ratio).toFixed(2));
+        }
     };
+
+    useEffect(() => {
+        if (coffeeAmount && waterAmount) {
+            const coffee = parseFloat(coffeeAmount);
+            const water = parseFloat(waterAmount);
+            setRatio(water / coffee);
+        }
+    }, [coffeeAmount, waterAmount]);
 
     useEffect(() => {
         const water = parseFloat(waterAmount);
@@ -153,7 +156,7 @@ const App = () => {
                         {isLinked ? <LinkIcon /> : <LinkOffIcon />}
                     </IconButton>
                     <TextField
-                        label="お湯の量(ml)"
+                        label="お湯の量"
                         type="number"
                         value={waterAmount}
                         onChange={(e) => handleWaterAmountChange(e.target.value)}
@@ -163,10 +166,10 @@ const App = () => {
                     />
                 </div>
                 <Grid container spacing={2} alignItems="center">
-                    <Grid item xs={2} align="center">
-                        <Typography variant="h6">風味</Typography>
+                    <Grid item xs={4}>
+                        <Typography variant="h6">風味:</Typography>
                     </Grid>
-                    <Grid item xs={10}>
+                    <Grid item xs={8}>
                         <TextField
                             select
                             value={flavor}
@@ -179,10 +182,10 @@ const App = () => {
                             <MenuItem value="明るめ">明るめ</MenuItem>
                         </TextField>
                     </Grid>
-                    <Grid item xs={2} align="center">
-                        <Typography variant="h6">濃さ</Typography>
+                    <Grid item xs={4}>
+                        <Typography variant="h6">濃さ:</Typography>
                     </Grid>
-                    <Grid item xs={10}>
+                    <Grid item xs={8}>
                         <TextField
                             select
                             value={strength}
