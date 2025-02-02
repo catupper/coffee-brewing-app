@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Container, TextField, MenuItem, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Typography, IconButton, Button } from '@mui/material';
+import { Container, TextField, MenuItem, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Typography, IconButton, Button, Grid } from '@mui/material';
 import LinkIcon from '@mui/icons-material/Link';
 import LinkOffIcon from '@mui/icons-material/LinkOff';
 
@@ -138,9 +138,6 @@ const App = () => {
 
     return (
         <Container maxWidth="sm" style={{ padding: '20px', marginTop: '20px', backgroundColor: '#f9f9f9', borderRadius: '10px' }}>
-            <Typography variant="h4" component="h1" align="center" gutterBottom>
-                コーヒー抽出計算
-            </Typography>
             <form style={{ marginBottom: '20px' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                     <TextField
@@ -156,7 +153,7 @@ const App = () => {
                         {isLinked ? <LinkIcon /> : <LinkOffIcon />}
                     </IconButton>
                     <TextField
-                        label="お湯の量"
+                        label="お湯の量(ml)"
                         type="number"
                         value={waterAmount}
                         onChange={(e) => handleWaterAmountChange(e.target.value)}
@@ -165,56 +162,79 @@ const App = () => {
                         required
                     />
                 </div>
-                <TextField
-                    select
-                    label="風味"
-                    value={flavor}
-                    onChange={(e) => setFlavor(e.target.value)}
-                    fullWidth
-                    margin="normal"
-                >
-                    <MenuItem value="標準">標準</MenuItem>
-                    <MenuItem value="甘め">甘め</MenuItem>
-                    <MenuItem value="明るめ">明るめ</MenuItem>
-                </TextField>
-                <TextField
-                    select
-                    label="濃さ"
-                    value={strength}
-                    onChange={(e) => setStrength(e.target.value)}
-                    fullWidth
-                    margin="normal"
-                >
-                    <MenuItem value="標準">標準</MenuItem>
-                    <MenuItem value="濃いめ">濃いめ</MenuItem>
-                    <MenuItem value="薄め">薄め</MenuItem>
-                </TextField>
+                <Grid container spacing={2} alignItems="center">
+                    <Grid item xs={2} align="center">
+                        <Typography variant="h6">風味</Typography>
+                    </Grid>
+                    <Grid item xs={10}>
+                        <TextField
+                            select
+                            value={flavor}
+                            onChange={(e) => setFlavor(e.target.value)}
+                            fullWidth
+                            margin="normal"
+                        >
+                            <MenuItem value="標準">標準</MenuItem>
+                            <MenuItem value="甘め">甘め</MenuItem>
+                            <MenuItem value="明るめ">明るめ</MenuItem>
+                        </TextField>
+                    </Grid>
+                    <Grid item xs={2} align="center">
+                        <Typography variant="h6">濃さ</Typography>
+                    </Grid>
+                    <Grid item xs={10}>
+                        <TextField
+                            select
+                            value={strength}
+                            onChange={(e) => setStrength(e.target.value)}
+                            fullWidth
+                            margin="normal"
+                        >
+                            <MenuItem value="標準">標準</MenuItem>
+                            <MenuItem value="濃いめ">濃いめ</MenuItem>
+                            <MenuItem value="薄め">薄め</MenuItem>
+                        </TextField>
+                    </Grid>
+                </Grid>
             </form>
             {brewingSteps.length > 0 && (
                 <TableContainer component={Paper}>
                     <Table>
                         <TableHead>
                             <TableRow>
-                                <TableCell align="center">経過時間</TableCell>
-                                <TableCell align="center">注湯量</TableCell>
-                                <TableCell align="center">総量</TableCell>
+                                <TableCell align="center" style={{ fontSize: '1.2rem' }}>経過時間</TableCell>
+                                <TableCell align="center" style={{ fontSize: '1.2rem' }}>注湯量</TableCell>
+                                <TableCell align="center" style={{ fontSize: '1.2rem' }}>総量</TableCell>
                             </TableRow>
                         </TableHead>
                         <TableBody>
-                            {brewingSteps.map((step, index) => (
-                                <TableRow key={index}>
-                                    <TableCell align="center">{formatTime(step.time)}</TableCell>
-                                    <TableCell align="center">{step.amount}ml</TableCell>
-                                    <TableCell align="center">{step.total}ml</TableCell>
-                                </TableRow>
-                            ))}
+                            {brewingSteps.map((step, index) => {
+                                const nextStepTime = brewingSteps[index + 1]?.time || Infinity;
+                                return (
+                                    <TableRow
+                                        key={index}
+                                        style={{
+                                            backgroundColor:
+                                                time >= step.time && time < nextStepTime
+                                                    ? '#f5e642'
+                                                    : time > step.time
+                                                        ? '#d3d3d3'
+                                                        : 'transparent',
+                                        }}
+                                    >
+                                        <TableCell align="center" style={{ fontSize: '1.1rem' }}>{formatTime(step.time)}</TableCell>
+                                        <TableCell align="center" style={{ fontSize: '1.1rem' }}>{step.amount}ml</TableCell>
+                                        <TableCell align="center" style={{ fontSize: '1.1rem' }}>{step.total}ml</TableCell>
+                                    </TableRow>
+                                );
+                            })}
                         </TableBody>
                     </Table>
                 </TableContainer>
             )}
-            <div style={{ marginTop: '20px', textAlign: 'center' }}>
-                <Typography variant="h6">タイマー: {formatTime(time)}</Typography>
-                <div style={{ marginTop: '10px', display: 'flex', justifyContent: 'center', gap: '10px' }}>
+            <div style={{ marginTop: '20px', textAlign: 'center', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <Typography variant="h5">タイマー: {formatTime(time)}</Typography>
+                <div style={{ marginLeft: '20px', display: 'flex', gap: '10px' }}>
                     <Button variant="contained" color="primary" onClick={() => setIsRunning(true)}>
                         スタート
                     </Button>
