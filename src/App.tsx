@@ -122,7 +122,6 @@ const App = () => {
                 onStrengthChange={setStrength}
                 onToggleLink={() => setIsLinked(!isLinked)}
             />
-            <BrewingTable brewingSteps={brewingSteps} currentTime={time} />
             <TimerControl
                 time={time}
                 isRunning={isRunning}
@@ -132,6 +131,7 @@ const App = () => {
                 onReset={resetTimer}
                 onToggleSound={() => setSoundEnabled(!soundEnabled)}
             />
+            <BrewingTable brewingSteps={brewingSteps} currentTime={time} />
         </Container>
     );
 };
