@@ -1,11 +1,81 @@
 import { Typography, Button } from '@mui/material';
 import Box from '@mui/material/Box';
 import CircularProgress from '@mui/material/CircularProgress';
+import { useTheme } from '@mui/material/styles';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import StopIcon from '@mui/icons-material/Stop';
 import ReplayIcon from '@mui/icons-material/Replay';
 import { formatTime, STEP_INTERVAL_SECONDS } from '../types';
 import type { BrewingStep } from '../types';
+
+const RING_SIZE = 180;
+const OUTER_THICKNESS = 6;
+const OUTER_RADIUS = (RING_SIZE - OUTER_THICKNESS) / 2;
+const OUTER_CIRCUMFERENCE = 2 * Math.PI * OUTER_RADIUS;
+const SEGMENT_GAP = 4;
+
+interface StepRingProps {
+    totalSteps: number;
+    currentStepIndex: number;
+    isFinished: boolean;
+}
+
+const StepRing = ({ totalSteps, currentStepIndex, isFinished }: StepRingProps) => {
+    const theme = useTheme();
+
+    if (totalSteps === 0) {
+        return (
+            <svg width={RING_SIZE} height={RING_SIZE}>
+                <circle
+                    cx={RING_SIZE / 2}
+                    cy={RING_SIZE / 2}
+                    r={OUTER_RADIUS}
+                    fill="none"
+                    stroke={theme.palette.action.hover}
+                    strokeWidth={OUTER_THICKNESS}
+                />
+            </svg>
+        );
+    }
+
+    const totalGap = totalSteps * SEGMENT_GAP;
+    const segmentLength = (OUTER_CIRCUMFERENCE - totalGap) / totalSteps;
+    const center = RING_SIZE / 2;
+
+    return (
+        <svg width={RING_SIZE} height={RING_SIZE}>
+            <g transform={`rotate(-90 ${center} ${center})`}>
+                {Array.from({ length: totalSteps }, (_, i) => {
+                    const offset = i * (segmentLength + SEGMENT_GAP);
+                    let color: string;
+                    if (isFinished || i < currentStepIndex) {
+                        color = theme.palette.primary.main;
+                    } else if (i === currentStepIndex) {
+                        color = theme.palette.secondary.main;
+                    } else {
+                        color = theme.palette.action.hover;
+                    }
+
+                    return (
+                        <circle
+                            key={i}
+                            cx={center}
+                            cy={center}
+                            r={OUTER_RADIUS}
+                            fill="none"
+                            stroke={color}
+                            strokeWidth={OUTER_THICKNESS}
+                            strokeDasharray={`${segmentLength} ${OUTER_CIRCUMFERENCE - segmentLength}`}
+                            strokeDashoffset={-offset}
+                            strokeLinecap="round"
+                            style={{ transition: 'stroke 0.3s ease' }}
+                        />
+                    );
+                })}
+            </g>
+        </svg>
+    );
+};
 
 interface TimerControlProps {
     time: number;
@@ -27,9 +97,7 @@ const TimerControl = ({
     onReset,
 }: TimerControlProps) => {
     const totalSteps = brewingSteps.length;
-    const progress = totalSteps > 0 && finishTime > 0 && finishTime !== Infinity
-        ? Math.min((time / finishTime) * 100, 100)
-        : 0;
+    const isFinished = finishTime !== Infinity && time >= finishTime;
 
     const stepProgress = (() => {
         if (currentStepIndex < 0 || totalSteps === 0) return 0;
@@ -45,24 +113,27 @@ const TimerControl = ({
                 position: 'relative',
                 display: 'inline-flex',
                 mb: 2,
+                width: RING_SIZE,
+                height: RING_SIZE,
             }}>
+                {/* Outer: segmented step indicator */}
+                <StepRing
+                    totalSteps={totalSteps}
+                    currentStepIndex={currentStepIndex}
+                    isFinished={isFinished}
+                />
+
+                {/* Inner: current step time progress */}
                 <CircularProgress
                     variant="determinate"
                     value={100}
-                    size={180}
-                    thickness={2}
-                    sx={{ color: 'action.hover' }}
-                />
-                <CircularProgress
-                    variant="determinate"
-                    value={progress}
-                    size={180}
-                    thickness={2}
+                    size={156}
+                    thickness={2.5}
                     sx={{
-                        color: 'primary.main',
+                        color: 'action.hover',
                         position: 'absolute',
-                        left: 0,
-                        transition: 'stroke-dashoffset 0.5s ease',
+                        left: 12,
+                        top: 12,
                     }}
                 />
                 <CircularProgress
@@ -78,6 +149,8 @@ const TimerControl = ({
                         transition: 'stroke-dashoffset 0.5s ease',
                     }}
                 />
+
+                {/* Center text */}
                 <Box sx={{
                     position: 'absolute',
                     top: 0,
