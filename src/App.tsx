@@ -1,5 +1,5 @@
-import { useState, useEffect, useMemo, useRef } from 'react';
-import { Container, Typography } from '@mui/material';
+import { useState, useEffect, useMemo, useRef, useCallback } from 'react';
+import { Container, Typography, Alert } from '@mui/material';
 import {
     calculateBrewingSteps,
     playBeep,
@@ -7,6 +7,7 @@ import {
     setStorage,
     DEFAULT_COFFEE,
     DEFAULT_WATER,
+    STEP_INTERVAL_SECONDS,
     COLORS,
 } from './types';
 import type { BrewingStep, Flavor, Strength } from './types';
@@ -46,7 +47,15 @@ const App = () => {
         return -1;
     }, [time, brewingSteps]);
 
+    const finishTime = useMemo(() => {
+        if (brewingSteps.length === 0) return Infinity;
+        return brewingSteps[brewingSteps.length - 1].time + STEP_INTERVAL_SECONDS;
+    }, [brewingSteps]);
+
+    const isBrewingComplete = isRunning && time >= finishTime;
+
     const prevStepRef = useRef(-1);
+    const hasNotifiedCompleteRef = useRef(false);
 
     useEffect(() => {
         if (!isRunning || !soundEnabled) return;
@@ -62,6 +71,21 @@ const App = () => {
         }
     }, [currentStepIndex, isRunning, soundEnabled, brewingSteps.length]);
 
+    // 抽出完了時の通知（バイブレーション + サウンド）
+    useEffect(() => {
+        if (isBrewingComplete && !hasNotifiedCompleteRef.current) {
+            hasNotifiedCompleteRef.current = true;
+            if (navigator.vibrate) {
+                navigator.vibrate([200, 100, 200, 100, 200]);
+            }
+            if (soundEnabled) {
+                playBeep(880, 300);
+                setTimeout(() => playBeep(880, 300), 400);
+                setTimeout(() => playBeep(1760, 500), 800);
+            }
+        }
+    }, [isBrewingComplete, soundEnabled]);
+
     useEffect(() => {
         let timer: number | undefined;
         if (isRunning) {
@@ -74,11 +98,12 @@ const App = () => {
         return () => clearInterval(timer);
     }, [isRunning]);
 
-    const resetTimer = () => {
+    const resetTimer = useCallback(() => {
         setTime(0);
         setIsRunning(false);
         prevStepRef.current = -1;
-    };
+        hasNotifiedCompleteRef.current = false;
+    }, []);
 
     const handleCoffeeAmountChange = (newCoffee: string) => {
         setCoffeeAmount(newCoffee);
@@ -122,6 +147,11 @@ const App = () => {
                 onStrengthChange={setStrength}
                 onToggleLink={() => setIsLinked(!isLinked)}
             />
+            {isBrewingComplete && (
+                <Alert severity="success" sx={{ mt: 2, fontSize: '1.1rem', fontWeight: 'bold' }}>
+                    抽出完了！ドリッパーを外してください
+                </Alert>
+            )}
             <TimerControl
                 time={time}
                 isRunning={isRunning}

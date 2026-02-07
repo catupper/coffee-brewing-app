@@ -29,6 +29,7 @@ const TimerControl = ({ time, isRunning, soundEnabled, onStart, onStop, onReset,
                 variant="h4"
                 role="timer"
                 aria-live="polite"
+                aria-label={`経過時間 ${formatTime(time)}${isRunning ? ' 実行中' : ''}`}
                 sx={{ fontWeight: 'bold', fontVariantNumeric: 'tabular-nums' }}
             >
                 {formatTime(time)}
