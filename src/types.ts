@@ -87,12 +87,66 @@ export const formatTime = (seconds: number): string => {
 
 const BELL_SRC = `${import.meta.env.BASE_URL}bell.mp3`;
 
-export const playBell = () => {
+let audioContext: AudioContext | null = null;
+let bellBuffer: AudioBuffer | null = null;
+
+const getAudioContext = (): AudioContext => {
+    if (!audioContext) {
+        audioContext = new AudioContext();
+    }
+    return audioContext;
+};
+
+const loadBellBuffer = async (): Promise<void> => {
+    if (bellBuffer) return;
+    const ctx = getAudioContext();
+    const response = await fetch(BELL_SRC);
+    const arrayBuffer = await response.arrayBuffer();
+    bellBuffer = await ctx.decodeAudioData(arrayBuffer);
+};
+
+/** ユーザージェスチャー内で呼び出し、AudioContextをアンロックする */
+export const unlockAudio = async (): Promise<void> => {
     try {
-        const audio = new Audio(BELL_SRC);
-        audio.volume = 0.5;
-        audio.play();
+        const ctx = getAudioContext();
+        if (ctx.state === 'suspended') {
+            await ctx.resume();
+        }
+        await loadBellBuffer();
+    } catch (e) {
+        console.warn('Audio unlock failed:', e);
+    }
+};
+
+export const playBell = (): void => {
+    try {
+        const ctx = getAudioContext();
+        if (!bellBuffer || ctx.state !== 'running') return;
+        const source = ctx.createBufferSource();
+        source.buffer = bellBuffer;
+        const gain = ctx.createGain();
+        gain.gain.value = 0.5;
+        source.connect(gain).connect(ctx.destination);
+        source.start();
     } catch (e) {
         console.warn('Bell playback failed:', e);
+    }
+};
+
+/** 指定回数のベル音をAudioContextタイミングでスケジュール再生する */
+export const playBellSequence = (count: number, intervalSec: number): void => {
+    try {
+        const ctx = getAudioContext();
+        if (!bellBuffer || ctx.state !== 'running') return;
+        for (let i = 0; i < count; i++) {
+            const source = ctx.createBufferSource();
+            source.buffer = bellBuffer;
+            const gain = ctx.createGain();
+            gain.gain.value = 0.5;
+            source.connect(gain).connect(ctx.destination);
+            source.start(ctx.currentTime + i * intervalSec);
+        }
+    } catch (e) {
+        console.warn('Bell sequence playback failed:', e);
     }
 };
