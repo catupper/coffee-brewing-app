@@ -44,18 +44,23 @@ const StepRing = ({ totalSteps, currentStepIndex, isFinished }: StepRingProps) =
     const center = RING_SIZE / 2;
 
     return (
-        <svg width={RING_SIZE} height={RING_SIZE}>
+        <svg width={RING_SIZE} height={RING_SIZE}
+            style={{
+                '--ring-active': theme.palette.stepStatus.activeRing,
+                '--ring-completed': theme.palette.stepStatus.completedRing,
+            } as React.CSSProperties}
+        >
             <defs>
                 <style>{`
                     @keyframes segmentPulse {
-                        0%, 100% { opacity: 1; }
-                        50% { opacity: 0.55; }
+                        0%, 100% { stroke: var(--ring-active); }
+                        50% { stroke: var(--ring-completed); }
                     }
                     .segment-active {
                         animation: segmentPulse 2.5s ease-in-out infinite;
                     }
                     @media (prefers-reduced-motion: reduce) {
-                        .segment-active { animation: none; opacity: 1; }
+                        .segment-active { animation: none; }
                     }
                 `}</style>
             </defs>
@@ -79,23 +84,29 @@ const StepRing = ({ totalSteps, currentStepIndex, isFinished }: StepRingProps) =
                         className = undefined;
                     }
 
-                    return (
-                        <circle
-                            key={i}
-                            className={className}
-                            cx={center}
-                            cy={center}
-                            r={OUTER_RADIUS}
-                            fill="none"
-                            stroke={color}
-                            strokeWidth={thickness}
-                            strokeDasharray={`${segmentLength} ${OUTER_CIRCUMFERENCE - segmentLength}`}
-                            strokeDashoffset={-offset}
-                            strokeLinecap="round"
-                            style={{ transition: 'stroke 0.3s ease, stroke-width 0.3s ease' }}
-                        />
-                    );
-                })}
+                    return { i, offset, color, thickness, className };
+                })
+                .sort((a, b) => {
+                    const aActive = a.className === 'segment-active' ? 1 : 0;
+                    const bActive = b.className === 'segment-active' ? 1 : 0;
+                    return aActive - bActive;
+                })
+                .map(({ i, offset, color, thickness, className }) => (
+                    <circle
+                        key={i}
+                        className={className}
+                        cx={center}
+                        cy={center}
+                        r={OUTER_RADIUS}
+                        fill="none"
+                        stroke={color}
+                        strokeWidth={thickness}
+                        strokeDasharray={`${segmentLength} ${OUTER_CIRCUMFERENCE - segmentLength}`}
+                        strokeDashoffset={-offset}
+                        strokeLinecap="round"
+                        style={{ transition: 'stroke 0.3s ease, stroke-width 0.3s ease' }}
+                    />
+                ))}
             </g>
         </svg>
     );
