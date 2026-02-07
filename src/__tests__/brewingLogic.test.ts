@@ -135,18 +135,18 @@ describe('calculateBrewingSteps', () => {
 
 describe('formatTime', () => {
     it('0秒', () => {
-        expect(formatTime(0)).toBe('0分00秒');
+        expect(formatTime(0)).toBe('00:00');
     });
 
     it('45秒', () => {
-        expect(formatTime(45)).toBe('0分45秒');
+        expect(formatTime(45)).toBe('00:45');
     });
 
     it('90秒', () => {
-        expect(formatTime(90)).toBe('1分30秒');
+        expect(formatTime(90)).toBe('01:30');
     });
 
     it('300秒', () => {
-        expect(formatTime(300)).toBe('5分00秒');
+        expect(formatTime(300)).toBe('05:00');
     });
 });

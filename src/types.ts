@@ -8,14 +8,6 @@ export interface BrewingStep {
 export type Flavor = '標準' | '甘め' | '明るめ';
 export type Strength = '標準' | '濃いめ' | '薄め';
 
-// --- 色定数 ---
-export const COLORS = {
-    currentStep: '#fff3cd',
-    completedStep: '#e8e8e8',
-    finishStep: '#a5d6a7',
-    containerBg: '#f9f9f9',
-} as const;
-
 // --- 定数 ---
 export const FIRST_RATIO = 0.4;
 export const LAST_RATIO = 0.6;
@@ -90,7 +82,7 @@ export const calculateBrewingSteps = (totalWater: number, flavor: Flavor, streng
 export const formatTime = (seconds: number): string => {
     const minutes = Math.floor(seconds / 60);
     const remainingSeconds = seconds % 60;
-    return `${String(minutes).padStart(1, '0')}分${String(remainingSeconds).padStart(2, '0')}秒`;
+    return `${String(minutes).padStart(2, '0')}:${String(remainingSeconds).padStart(2, '0')}`;
 };
 
 let audioContext: AudioContext | null = null;

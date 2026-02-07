@@ -1,5 +1,14 @@
 import { useState, useEffect, useMemo, useRef, useCallback } from 'react';
-import { Container, Typography, Alert } from '@mui/material';
+import { Container, Typography, Alert, Card, CardContent, IconButton, Fade, Grow, Collapse, Chip } from '@mui/material';
+import Box from '@mui/material/Box';
+import LocalCafeIcon from '@mui/icons-material/LocalCafe';
+import DarkModeIcon from '@mui/icons-material/DarkMode';
+import LightModeIcon from '@mui/icons-material/LightMode';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import ExpandLessIcon from '@mui/icons-material/ExpandLess';
+import VolumeUpIcon from '@mui/icons-material/VolumeUp';
+import VolumeOffIcon from '@mui/icons-material/VolumeOff';
+import { useColorScheme } from '@mui/material/styles';
 import {
     calculateBrewingSteps,
     playBeep,
@@ -8,7 +17,6 @@ import {
     DEFAULT_COFFEE,
     DEFAULT_WATER,
     STEP_INTERVAL_SECONDS,
-    COLORS,
 } from './types';
 import type { BrewingStep, Flavor, Strength } from './types';
 import BrewingTips from './components/BrewingTips';
@@ -17,6 +25,7 @@ import BrewingTable from './components/BrewingTable';
 import TimerControl from './components/TimerControl';
 
 const App = () => {
+    const { mode, setMode } = useColorScheme();
     const [coffeeAmount, setCoffeeAmount] = useState(getStorage('coffeeAmount') || DEFAULT_COFFEE);
     const [waterAmount, setWaterAmount] = useState(getStorage('waterAmount') || DEFAULT_WATER);
     const [flavor, setFlavor] = useState<Flavor>((getStorage('flavor') as Flavor) || '標準');
@@ -26,6 +35,13 @@ const App = () => {
     const [time, setTime] = useState(0);
     const [isRunning, setIsRunning] = useState(false);
     const [soundEnabled, setSoundEnabled] = useState(true);
+    const [formExpanded, setFormExpanded] = useState(true);
+
+    const timerActive = isRunning || time > 0;
+
+    useEffect(() => {
+        if (isRunning) setFormExpanded(false);
+    }, [isRunning]);
 
     const ratio = useMemo(() => {
         const coffee = parseFloat(coffeeAmount);
@@ -61,7 +77,6 @@ const App = () => {
         if (!isRunning || !soundEnabled) return;
         if (currentStepIndex !== prevStepRef.current && currentStepIndex >= 0) {
             if (currentStepIndex === brewingSteps.length - 1) {
-                // 最終ステップ: ダブルビープ
                 playBeep(880, 200);
                 setTimeout(() => playBeep(880, 200), 300);
             } else {
@@ -71,7 +86,6 @@ const App = () => {
         }
     }, [currentStepIndex, isRunning, soundEnabled, brewingSteps.length]);
 
-    // 抽出完了時の通知（バイブレーション + サウンド）
     useEffect(() => {
         if (isBrewingComplete && !hasNotifiedCompleteRef.current) {
             hasNotifiedCompleteRef.current = true;
@@ -128,41 +142,162 @@ const App = () => {
         setStorage('strength', strength);
     }, [coffeeAmount, waterAmount, flavor, strength]);
 
+    const toggleColorMode = () => {
+        setMode(mode === 'dark' ? 'light' : 'dark');
+    };
+
     return (
-        <Container maxWidth="sm" sx={{ p: '20px', mt: '20px', backgroundColor: COLORS.containerBg, borderRadius: '10px' }}>
-            <Typography variant="h5" align="center" gutterBottom sx={{ fontWeight: 'bold', mb: 2 }}>
-                4:6 コーヒー抽出ガイド
-            </Typography>
-            <BrewingTips />
-            <BrewingForm
-                coffeeAmount={coffeeAmount}
-                waterAmount={waterAmount}
-                flavor={flavor}
-                strength={strength}
-                isLinked={isLinked}
-                ratio={ratio}
-                onCoffeeAmountChange={handleCoffeeAmountChange}
-                onWaterAmountChange={handleWaterAmountChange}
-                onFlavorChange={setFlavor}
-                onStrengthChange={setStrength}
-                onToggleLink={() => setIsLinked(!isLinked)}
-            />
-            {isBrewingComplete && (
-                <Alert severity="success" sx={{ mt: 2, fontSize: '1.1rem', fontWeight: 'bold' }}>
-                    抽出完了！ドリッパーを外してください
-                </Alert>
-            )}
-            <TimerControl
-                time={time}
-                isRunning={isRunning}
-                soundEnabled={soundEnabled}
-                onStart={() => setIsRunning(true)}
-                onStop={() => setIsRunning(false)}
-                onReset={resetTimer}
-                onToggleSound={() => setSoundEnabled(!soundEnabled)}
-            />
-            <BrewingTable brewingSteps={brewingSteps} currentTime={time} />
-        </Container>
+        <Box sx={{
+            minHeight: '100vh',
+            bgcolor: 'background.default',
+            py: { xs: 2, sm: 4 },
+            transition: 'background-color 0.3s ease',
+        }}>
+            <Container maxWidth="sm">
+                {/* Header */}
+                <Box sx={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    mb: 2,
+                }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
+                        <LocalCafeIcon sx={{ fontSize: 22, color: 'primary.main' }} />
+                        <Typography variant="subtitle1" sx={{ fontWeight: 700, color: 'primary.main', lineHeight: 1 }}>
+                            4:6
+                        </Typography>
+                    </Box>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                        <IconButton
+                            onClick={() => setSoundEnabled(!soundEnabled)}
+                            size="small"
+                            aria-label={soundEnabled ? '通知音をオフにする' : '通知音をオンにする'}
+                            sx={{ color: soundEnabled ? 'primary.main' : 'text.disabled' }}
+                        >
+                            {soundEnabled ? <VolumeUpIcon fontSize="small" /> : <VolumeOffIcon fontSize="small" />}
+                        </IconButton>
+                        <IconButton
+                            onClick={toggleColorMode}
+                            size="small"
+                            aria-label={mode === 'dark' ? 'ライトモードに切り替え' : 'ダークモードに切り替え'}
+                            sx={{ color: 'text.secondary' }}
+                        >
+                            {mode === 'dark' ? <LightModeIcon fontSize="small" /> : <DarkModeIcon fontSize="small" />}
+                        </IconButton>
+                    </Box>
+                </Box>
+
+                {/* Tips */}
+                <Box sx={{ mb: 2.5 }}>
+                    <BrewingTips />
+                </Box>
+
+                {/* Form */}
+                <Card sx={{ mb: 2.5, bgcolor: 'background.paper', overflow: 'hidden' }}>
+                    {/* Summary bar — always visible, clickable to toggle */}
+                    <Box
+                        onClick={() => setFormExpanded((v) => !v)}
+                        sx={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'space-between',
+                            px: { xs: 2, sm: 3 },
+                            py: 1.5,
+                            cursor: 'pointer',
+                            userSelect: 'none',
+                            '&:hover': { bgcolor: 'action.hover' },
+                            transition: 'background-color 0.15s ease',
+                        }}
+                        role="button"
+                        aria-expanded={formExpanded}
+                        aria-label="抽出設定の展開/折りたたみ"
+                    >
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexWrap: 'wrap', minWidth: 0 }}>
+                            <Typography variant="subtitle2" color="text.secondary" sx={{ flexShrink: 0 }}>
+                                設定
+                            </Typography>
+                            <Box sx={{ display: 'flex', gap: 0.75, flexWrap: 'wrap' }}>
+                                <Chip label={`${coffeeAmount}g / ${waterAmount}ml`} size="small" variant="outlined" />
+                                <Chip label={flavor} size="small" variant={flavor !== '標準' ? 'filled' : 'outlined'} color={flavor !== '標準' ? 'primary' : 'default'} />
+                                <Chip label={strength} size="small" variant={strength !== '標準' ? 'filled' : 'outlined'} color={strength !== '標準' ? 'primary' : 'default'} />
+                            </Box>
+                        </Box>
+                        <IconButton
+                            size="small"
+                            tabIndex={-1}
+                            sx={{ color: 'text.secondary', ml: 1, flexShrink: 0 }}
+                        >
+                            {formExpanded ? <ExpandLessIcon fontSize="small" /> : <ExpandMoreIcon fontSize="small" />}
+                        </IconButton>
+                    </Box>
+
+                    {/* Collapsible form body */}
+                    <Collapse in={formExpanded} timeout={250}>
+                        <CardContent sx={{
+                            px: { xs: 2, sm: 3 },
+                            pt: 0,
+                            pb: { xs: 2, sm: 3 },
+                            '&:last-child': { pb: { xs: 2, sm: 3 } },
+                        }}>
+                            <BrewingForm
+                                coffeeAmount={coffeeAmount}
+                                waterAmount={waterAmount}
+                                flavor={flavor}
+                                strength={strength}
+                                isLinked={isLinked}
+                                ratio={ratio}
+                                onCoffeeAmountChange={handleCoffeeAmountChange}
+                                onWaterAmountChange={handleWaterAmountChange}
+                                onFlavorChange={setFlavor}
+                                onStrengthChange={setStrength}
+                                onToggleLink={() => setIsLinked(!isLinked)}
+                            />
+                        </CardContent>
+                    </Collapse>
+                </Card>
+
+                {/* Completion Alert */}
+                <Grow in={isBrewingComplete} unmountOnExit>
+                    <Alert
+                        severity="success"
+                        sx={{
+                            mb: 2.5,
+                            fontSize: '1.1rem',
+                            fontWeight: 'bold',
+                        }}
+                    >
+                        抽出完了！ドリッパーを外してください
+                    </Alert>
+                </Grow>
+
+                {/* Timer */}
+                <Card sx={{ mb: 2.5, bgcolor: 'background.paper' }}>
+                    <CardContent sx={{ p: { xs: 2, sm: 3 }, '&:last-child': { pb: { xs: 2, sm: 3 } } }}>
+                        <TimerControl
+                            time={time}
+                            isRunning={isRunning}
+                            currentStepIndex={currentStepIndex}
+                            brewingSteps={brewingSteps}
+                            finishTime={finishTime}
+                            onToggleRunning={() => setIsRunning(!isRunning)}
+                            onReset={resetTimer}
+                        />
+                    </CardContent>
+                </Card>
+
+                {/* Brewing Steps Table */}
+                <Fade in={brewingSteps.length > 0}>
+                    <Card sx={{ mb: 3, bgcolor: 'background.paper', overflow: 'hidden' }}>
+                        <BrewingTable brewingSteps={brewingSteps} currentTime={time} />
+                    </Card>
+                </Fade>
+
+                {/* Footer */}
+                <Typography variant="caption" color="text.secondary" sx={{ display: 'block', textAlign: 'center', mt: 2, pb: 2 }}>
+                    4:6 Method by Tetsu Kasuya
+                </Typography>
+            </Container>
+        </Box>
     );
 };
 
