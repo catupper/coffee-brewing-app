@@ -102,10 +102,12 @@ const TimerControl = ({
                         aria-label={`経過時間 ${formatTime(time)}${isRunning ? ' 実行中' : ''}`}
                         sx={{
                             fontWeight: 700,
-                            fontFamily: "'Inter', 'Noto Sans JP', monospace",
+                            fontFamily: "'Inter', monospace",
                             fontVariantNumeric: 'tabular-nums',
-                            letterSpacing: '0.02em',
+                            letterSpacing: '0.05em',
                             color: 'text.primary',
+                            whiteSpace: 'nowrap',
+                            fontSize: 'clamp(2rem, 10vw, 3rem)',
                         }}
                     >
                         {formatTime(time)}
