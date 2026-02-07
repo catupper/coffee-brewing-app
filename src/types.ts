@@ -8,14 +8,6 @@ export interface BrewingStep {
 export type Flavor = '標準' | '甘め' | '明るめ';
 export type Strength = '標準' | '濃いめ' | '薄め';
 
-// --- 色定数 ---
-export const COLORS = {
-    currentStep: 'rgba(164, 119, 100, 0.12)',
-    completedStep: 'rgba(164, 119, 100, 0.05)',
-    finishStep: 'rgba(85, 139, 47, 0.15)',
-    containerBg: 'transparent',
-} as const;
-
 // --- 定数 ---
 export const FIRST_RATIO = 0.4;
 export const LAST_RATIO = 0.6;

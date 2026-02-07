@@ -31,7 +31,7 @@ const StepRing = ({ totalSteps, currentStepIndex, isFinished }: StepRingProps) =
                     cy={RING_SIZE / 2}
                     r={OUTER_RADIUS}
                     fill="none"
-                    stroke={theme.palette.action.hover}
+                    stroke={theme.palette.stepStatus.pendingRing}
                     strokeWidth={OUTER_THICKNESS}
                 />
             </svg>
@@ -49,11 +49,11 @@ const StepRing = ({ totalSteps, currentStepIndex, isFinished }: StepRingProps) =
                     const offset = i * (segmentLength + SEGMENT_GAP);
                     let color: string;
                     if (isFinished || i < currentStepIndex) {
-                        color = theme.palette.primary.main;
+                        color = theme.palette.stepStatus.completedRing;
                     } else if (i === currentStepIndex) {
-                        color = theme.palette.secondary.main;
+                        color = theme.palette.stepStatus.activeRing;
                     } else {
-                        color = theme.palette.action.hover;
+                        color = theme.palette.stepStatus.pendingRing;
                     }
 
                     return (
@@ -96,6 +96,7 @@ const TimerControl = ({
     onToggleRunning,
     onReset,
 }: TimerControlProps) => {
+    const theme = useTheme();
     const totalSteps = brewingSteps.length;
     const isFinished = finishTime !== Infinity && time >= finishTime;
 
@@ -142,7 +143,7 @@ const TimerControl = ({
                     size={156}
                     thickness={2.5}
                     sx={{
-                        color: 'secondary.main',
+                        color: theme.palette.stepStatus.activeRing,
                         position: 'absolute',
                         left: 12,
                         top: 12,
@@ -180,7 +181,7 @@ const TimerControl = ({
                         {formatTime(time)}
                     </Typography>
                     {totalSteps > 0 && currentStepIndex >= 0 && currentStepIndex < totalSteps && (
-                        <Typography variant="body2" sx={{ fontWeight: 600, color: 'secondary.main', mt: 0.25 }}>
+                        <Typography variant="body2" sx={{ fontWeight: 600, color: theme.palette.stepStatus.activeRing, mt: 0.25 }}>
                             {brewingSteps[currentStepIndex].amount}ml 注湯
                         </Typography>
                     )}

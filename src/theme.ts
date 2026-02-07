@@ -1,5 +1,18 @@
 import { createTheme, alpha } from '@mui/material/styles';
 
+interface StepStatusColors {
+    completedRing: string;
+    completedBg: string;
+    completedBorder: string;
+    activeRing: string;
+    activeBg: string;
+    activeBorder: string;
+    pendingRing: string;
+    pendingBg: string;
+    finishBg: string;
+    finishBorder: string;
+}
+
 declare module '@mui/material/styles' {
     interface Palette {
         coffee: {
@@ -9,6 +22,7 @@ declare module '@mui/material/styles' {
             cream: string;
             caramel: string;
         };
+        stepStatus: StepStatusColors;
     }
     interface PaletteOptions {
         coffee?: {
@@ -18,6 +32,7 @@ declare module '@mui/material/styles' {
             cream: string;
             caramel: string;
         };
+        stepStatus?: StepStatusColors;
     }
 }
 
@@ -72,6 +87,18 @@ const theme = createTheme({
                     cream: coffeeColors.cream,
                     caramel: coffeeColors.caramel,
                 },
+                stepStatus: {
+                    completedRing: coffeeColors.mocha,
+                    completedBg: alpha(coffeeColors.mocha, 0.08),
+                    completedBorder: coffeeColors.mocha,
+                    activeRing: '#D4952A',
+                    activeBg: alpha('#D4952A', 0.10),
+                    activeBorder: '#D4952A',
+                    pendingRing: '#D5CBC2',
+                    pendingBg: 'transparent',
+                    finishBg: alpha('#558B2F', 0.12),
+                    finishBorder: '#558B2F',
+                },
             },
         },
         dark: {
@@ -109,6 +136,18 @@ const theme = createTheme({
                     dark: coffeeColors.mocha,
                     cream: '#F8DD98',
                     caramel: '#D4952A',
+                },
+                stepStatus: {
+                    completedRing: '#C4A48E',
+                    completedBg: alpha('#C4A48E', 0.10),
+                    completedBorder: '#C4A48E',
+                    activeRing: '#F0C060',
+                    activeBg: alpha('#F0C060', 0.12),
+                    activeBorder: '#F0C060',
+                    pendingRing: '#4A3C32',
+                    pendingBg: 'transparent',
+                    finishBg: alpha('#81C784', 0.12),
+                    finishBorder: '#81C784',
                 },
             },
         },
