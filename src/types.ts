@@ -93,19 +93,52 @@ export const formatTime = (seconds: number): string => {
     return `${String(minutes).padStart(1, '0')}分${String(remainingSeconds).padStart(2, '0')}秒`;
 };
 
-export const playBeep = (frequency: number = 440, duration: number = 200) => {
+export const playChime = (type: 'step' | 'finish' = 'step') => {
+    // バイブレーション（対応端末のみ）
+    try {
+        if (navigator.vibrate) {
+            navigator.vibrate(type === 'finish' ? [120, 80, 120] : 100);
+        }
+    } catch (_) {
+        // Vibration not supported
+    }
+
+    // チャイム音
     try {
         const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
-        const oscillator = audioContext.createOscillator();
-        const gainNode = audioContext.createGain();
-        oscillator.connect(gainNode);
-        gainNode.connect(audioContext.destination);
-        oscillator.frequency.value = frequency;
-        oscillator.type = 'sine';
-        gainNode.gain.value = 0.3;
-        oscillator.start();
-        oscillator.stop(audioContext.currentTime + duration / 1000);
-    } catch (e) {
+        const now = audioContext.currentTime;
+
+        const baseFreq = type === 'finish' ? 784 : 523; // G5 / C5
+        const duration = type === 'finish' ? 0.6 : 0.5;
+        const harmonics = [
+            { ratio: 1, amp: 0.25 },
+            { ratio: 2, amp: 0.1 },
+            { ratio: 3, amp: 0.05 },
+        ];
+
+        const scheduleChime = (freq: number, startTime: number) => {
+            harmonics.forEach(({ ratio, amp }) => {
+                const osc = audioContext.createOscillator();
+                const gain = audioContext.createGain();
+                osc.connect(gain);
+                gain.connect(audioContext.destination);
+                osc.frequency.value = freq * ratio;
+                osc.type = 'sine';
+                gain.gain.setValueAtTime(0, startTime);
+                gain.gain.linearRampToValueAtTime(amp, startTime + 0.015);
+                gain.gain.exponentialRampToValueAtTime(0.001, startTime + duration);
+                osc.start(startTime);
+                osc.stop(startTime + duration);
+            });
+        };
+
+        scheduleChime(baseFreq, now);
+
+        if (type === 'finish') {
+            // 2音目: 長3度上（C5→E5相当）で完了感を演出
+            scheduleChime(baseFreq * 5 / 4, now + 0.35);
+        }
+    } catch (_) {
         // Audio not supported
     }
 };

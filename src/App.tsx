@@ -2,7 +2,7 @@ import { useState, useEffect, useMemo, useRef } from 'react';
 import { Container, Typography } from '@mui/material';
 import {
     calculateBrewingSteps,
-    playBeep,
+    playChime,
     getStorage,
     setStorage,
     DEFAULT_COFFEE,
@@ -52,11 +52,9 @@ const App = () => {
         if (!isRunning || !soundEnabled) return;
         if (currentStepIndex !== prevStepRef.current && currentStepIndex >= 0) {
             if (currentStepIndex === brewingSteps.length - 1) {
-                // 最終ステップ: ダブルビープ
-                playBeep(880, 200);
-                setTimeout(() => playBeep(880, 200), 300);
+                playChime('finish');
             } else {
-                playBeep(440, 200);
+                playChime('step');
             }
             prevStepRef.current = currentStepIndex;
         }
