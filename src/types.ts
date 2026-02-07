@@ -85,34 +85,14 @@ export const formatTime = (seconds: number): string => {
     return `${String(minutes).padStart(2, '0')}:${String(remainingSeconds).padStart(2, '0')}`;
 };
 
-let audioContext: AudioContext | null = null;
+const BELL_SRC = `${import.meta.env.BASE_URL}bell.mp3`;
 
-const getAudioContext = (): AudioContext | null => {
+export const playBell = () => {
     try {
-        if (!audioContext || audioContext.state === 'closed') {
-            audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
-        }
-        return audioContext;
+        const audio = new Audio(BELL_SRC);
+        audio.volume = 0.5;
+        audio.play();
     } catch (e) {
-        console.warn('Web Audio API is not supported:', e);
-        return null;
-    }
-};
-
-export const playBeep = (frequency: number = 440, duration: number = 200) => {
-    const ctx = getAudioContext();
-    if (!ctx) return;
-    try {
-        const oscillator = ctx.createOscillator();
-        const gainNode = ctx.createGain();
-        oscillator.connect(gainNode);
-        gainNode.connect(ctx.destination);
-        oscillator.frequency.value = frequency;
-        oscillator.type = 'sine';
-        gainNode.gain.value = 0.3;
-        oscillator.start();
-        oscillator.stop(ctx.currentTime + duration / 1000);
-    } catch (e) {
-        console.warn('Beep playback failed:', e);
+        console.warn('Bell playback failed:', e);
     }
 };
