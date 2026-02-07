@@ -277,7 +277,7 @@ const App = () => {
                             time={time}
                             isRunning={isRunning}
                             currentStepIndex={currentStepIndex}
-                            totalSteps={brewingSteps.length}
+                            brewingSteps={brewingSteps}
                             finishTime={finishTime}
                             onToggleRunning={() => setIsRunning(!isRunning)}
                             onReset={resetTimer}

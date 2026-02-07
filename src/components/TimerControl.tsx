@@ -5,12 +5,13 @@ import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import StopIcon from '@mui/icons-material/Stop';
 import ReplayIcon from '@mui/icons-material/Replay';
 import { formatTime, STEP_INTERVAL_SECONDS } from '../types';
+import type { BrewingStep } from '../types';
 
 interface TimerControlProps {
     time: number;
     isRunning: boolean;
     currentStepIndex: number;
-    totalSteps: number;
+    brewingSteps: BrewingStep[];
     finishTime: number;
     onToggleRunning: () => void;
     onReset: () => void;
@@ -20,11 +21,12 @@ const TimerControl = ({
     time,
     isRunning,
     currentStepIndex,
-    totalSteps,
+    brewingSteps,
     finishTime,
     onToggleRunning,
     onReset,
 }: TimerControlProps) => {
+    const totalSteps = brewingSteps.length;
     const progress = totalSteps > 0 && finishTime > 0 && finishTime !== Infinity
         ? Math.min((time / finishTime) * 100, 100)
         : 0;
@@ -104,10 +106,15 @@ const TimerControl = ({
                     >
                         {formatTime(time)}
                     </Typography>
+                    {totalSteps > 0 && currentStepIndex >= 0 && currentStepIndex < totalSteps && (
+                        <Typography variant="body2" sx={{ fontWeight: 600, color: 'secondary.main', mt: 0.25 }}>
+                            {brewingSteps[currentStepIndex].amount}ml 注湯
+                        </Typography>
+                    )}
                     {totalSteps > 0 && (
-                        <Typography variant="caption" color="text.secondary">
+                        <Typography variant="caption" color="text.secondary" sx={{ mt: 0.25 }}>
                             {currentStepIndex >= 0
-                                ? `ステップ ${currentStepIndex + 1} / ${totalSteps}`
+                                ? `${currentStepIndex + 1} / ${totalSteps}`
                                 : `全${totalSteps}ステップ`
                             }
                         </Typography>
