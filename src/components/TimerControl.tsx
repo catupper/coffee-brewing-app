@@ -10,7 +10,8 @@ import type { BrewingStep } from '../types';
 
 const RING_SIZE = 180;
 const OUTER_THICKNESS = 6;
-const OUTER_RADIUS = (RING_SIZE - OUTER_THICKNESS) / 2;
+const ACTIVE_THICKNESS = 10;
+const OUTER_RADIUS = (RING_SIZE - ACTIVE_THICKNESS) / 2;
 const OUTER_CIRCUMFERENCE = 2 * Math.PI * OUTER_RADIUS;
 const SEGMENT_GAP = 4;
 
@@ -44,31 +45,54 @@ const StepRing = ({ totalSteps, currentStepIndex, isFinished }: StepRingProps) =
 
     return (
         <svg width={RING_SIZE} height={RING_SIZE}>
+            <defs>
+                <style>{`
+                    @keyframes segmentPulse {
+                        0%, 100% { opacity: 1; }
+                        50% { opacity: 0.55; }
+                    }
+                    .segment-active {
+                        animation: segmentPulse 2.5s ease-in-out infinite;
+                    }
+                    @media (prefers-reduced-motion: reduce) {
+                        .segment-active { animation: none; opacity: 1; }
+                    }
+                `}</style>
+            </defs>
             <g transform={`rotate(-90 ${center} ${center})`}>
                 {Array.from({ length: totalSteps }, (_, i) => {
                     const offset = i * (segmentLength + SEGMENT_GAP);
                     let color: string;
+                    let thickness: number;
+                    let className: string | undefined;
                     if (isFinished || i < currentStepIndex) {
                         color = theme.palette.stepStatus.completedRing;
+                        thickness = OUTER_THICKNESS;
+                        className = undefined;
                     } else if (i === currentStepIndex) {
                         color = theme.palette.stepStatus.activeRing;
+                        thickness = ACTIVE_THICKNESS;
+                        className = 'segment-active';
                     } else {
                         color = theme.palette.stepStatus.pendingRing;
+                        thickness = OUTER_THICKNESS;
+                        className = undefined;
                     }
 
                     return (
                         <circle
                             key={i}
+                            className={className}
                             cx={center}
                             cy={center}
                             r={OUTER_RADIUS}
                             fill="none"
                             stroke={color}
-                            strokeWidth={OUTER_THICKNESS}
+                            strokeWidth={thickness}
                             strokeDasharray={`${segmentLength} ${OUTER_CIRCUMFERENCE - segmentLength}`}
                             strokeDashoffset={-offset}
                             strokeLinecap="round"
-                            style={{ transition: 'stroke 0.3s ease' }}
+                            style={{ transition: 'stroke 0.3s ease, stroke-width 0.3s ease' }}
                         />
                     );
                 })}
@@ -183,14 +207,6 @@ const TimerControl = ({
                     {totalSteps > 0 && currentStepIndex >= 0 && currentStepIndex < totalSteps && (
                         <Typography variant="body2" sx={{ fontWeight: 600, color: theme.palette.stepStatus.activeRing, mt: 0.25 }}>
                             {brewingSteps[currentStepIndex].amount}ml 注湯
-                        </Typography>
-                    )}
-                    {totalSteps > 0 && (
-                        <Typography variant="caption" color="text.secondary" sx={{ mt: 0.25 }}>
-                            {currentStepIndex >= 0
-                                ? `${currentStepIndex + 1} / ${totalSteps}`
-                                : `全${totalSteps}ステップ`
-                            }
                         </Typography>
                     )}
                 </Box>
