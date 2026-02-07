@@ -1,4 +1,5 @@
 import { TextField, MenuItem, Typography, IconButton, Grid } from '@mui/material';
+import Box from '@mui/material/Box';
 import LinkIcon from '@mui/icons-material/Link';
 import LinkOffIcon from '@mui/icons-material/LinkOff';
 import Tooltip from '@mui/material/Tooltip';
@@ -33,7 +34,12 @@ const BrewingForm = ({
 }: BrewingFormProps) => {
     return (
         <form style={{ marginBottom: '20px' }} onSubmit={(e) => e.preventDefault()}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <Box sx={{
+                display: 'flex',
+                flexDirection: { xs: 'column', sm: 'row' },
+                alignItems: 'center',
+                gap: 1,
+            }}>
                 <TextField
                     label="コーヒー豆の量 (g)"
                     type="number"
@@ -45,12 +51,16 @@ const BrewingForm = ({
                     inputProps={{ min: 1 }}
                 />
                 <Tooltip title={isLinked ? `比率固定中 (1:${ratio.toFixed(1)})` : '比率固定なし'}>
-                    <IconButton onClick={onToggleLink} aria-label={isLinked ? '比率固定を解除' : '比率を固定'}>
+                    <IconButton
+                        onClick={onToggleLink}
+                        aria-label={isLinked ? '比率固定を解除' : '比率を固定'}
+                        sx={{ minWidth: 48, minHeight: 48 }}
+                    >
                         {isLinked ? <LinkIcon /> : <LinkOffIcon />}
                     </IconButton>
                 </Tooltip>
                 <TextField
-                    label="お湯の量"
+                    label="お湯の量 (ml)"
                     type="number"
                     value={waterAmount}
                     onChange={(e) => onWaterAmountChange(e.target.value)}
@@ -59,7 +69,7 @@ const BrewingForm = ({
                     required
                     inputProps={{ min: 1 }}
                 />
-            </div>
+            </Box>
             <Grid container spacing={2} alignItems="center">
                 <Grid item xs={4}>
                     <Typography variant="h6">風味:</Typography>
