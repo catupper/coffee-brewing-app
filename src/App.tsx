@@ -11,7 +11,9 @@ import VolumeOffIcon from '@mui/icons-material/VolumeOff';
 import { useColorScheme } from '@mui/material/styles';
 import {
     calculateBrewingSteps,
+    unlockAudio,
     playBell,
+    playBellSequence,
     getStorage,
     setStorage,
     DEFAULT_COFFEE,
@@ -79,8 +81,7 @@ const App = () => {
             if (currentStepIndex === 0) {
                 // 最初の注湯ではベルを鳴らさない
             } else if (currentStepIndex === brewingSteps.length - 1) {
-                playBell();
-                setTimeout(() => playBell(), 400);
+                playBellSequence(2, 0.4);
             } else {
                 playBell();
             }
@@ -95,9 +96,7 @@ const App = () => {
                 navigator.vibrate([200, 100, 200, 100, 200]);
             }
             if (soundEnabled) {
-                playBell();
-                setTimeout(() => playBell(), 400);
-                setTimeout(() => playBell(), 800);
+                playBellSequence(3, 0.4);
             }
         }
     }, [isBrewingComplete, soundEnabled]);
@@ -281,7 +280,10 @@ const App = () => {
                             currentStepIndex={currentStepIndex}
                             brewingSteps={brewingSteps}
                             finishTime={finishTime}
-                            onToggleRunning={() => setIsRunning(!isRunning)}
+                            onToggleRunning={() => {
+                                if (!isRunning) unlockAudio();
+                                setIsRunning(!isRunning);
+                            }}
                             onReset={resetTimer}
                         />
                     </CardContent>
