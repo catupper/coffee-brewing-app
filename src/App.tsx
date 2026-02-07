@@ -11,7 +11,7 @@ import VolumeOffIcon from '@mui/icons-material/VolumeOff';
 import { useColorScheme } from '@mui/material/styles';
 import {
     calculateBrewingSteps,
-    playBeep,
+    playBell,
     getStorage,
     setStorage,
     DEFAULT_COFFEE,
@@ -76,11 +76,13 @@ const App = () => {
     useEffect(() => {
         if (!isRunning || !soundEnabled) return;
         if (currentStepIndex !== prevStepRef.current && currentStepIndex >= 0) {
-            if (currentStepIndex === brewingSteps.length - 1) {
-                playBeep(880, 200);
-                setTimeout(() => playBeep(880, 200), 300);
+            if (currentStepIndex === 0) {
+                // 最初の注湯ではベルを鳴らさない
+            } else if (currentStepIndex === brewingSteps.length - 1) {
+                playBell();
+                setTimeout(() => playBell(), 400);
             } else {
-                playBeep(440, 200);
+                playBell();
             }
             prevStepRef.current = currentStepIndex;
         }
@@ -93,9 +95,9 @@ const App = () => {
                 navigator.vibrate([200, 100, 200, 100, 200]);
             }
             if (soundEnabled) {
-                playBeep(880, 300);
-                setTimeout(() => playBeep(880, 300), 400);
-                setTimeout(() => playBeep(1760, 500), 800);
+                playBell();
+                setTimeout(() => playBell(), 400);
+                setTimeout(() => playBell(), 800);
             }
         }
     }, [isBrewingComplete, soundEnabled]);
