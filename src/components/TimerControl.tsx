@@ -1,8 +1,6 @@
-import { Typography, IconButton, Button } from '@mui/material';
+import { Typography, Button } from '@mui/material';
 import Box from '@mui/material/Box';
 import CircularProgress from '@mui/material/CircularProgress';
-import VolumeUpIcon from '@mui/icons-material/VolumeUp';
-import VolumeOffIcon from '@mui/icons-material/VolumeOff';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import StopIcon from '@mui/icons-material/Stop';
 import ReplayIcon from '@mui/icons-material/Replay';
@@ -11,27 +9,21 @@ import { formatTime, STEP_INTERVAL_SECONDS } from '../types';
 interface TimerControlProps {
     time: number;
     isRunning: boolean;
-    soundEnabled: boolean;
     currentStepIndex: number;
     totalSteps: number;
     finishTime: number;
-    onStart: () => void;
-    onStop: () => void;
+    onToggleRunning: () => void;
     onReset: () => void;
-    onToggleSound: () => void;
 }
 
 const TimerControl = ({
     time,
     isRunning,
-    soundEnabled,
     currentStepIndex,
     totalSteps,
     finishTime,
-    onStart,
-    onStop,
+    onToggleRunning,
     onReset,
-    onToggleSound,
 }: TimerControlProps) => {
     const progress = totalSteps > 0 && finishTime > 0 && finishTime !== Infinity
         ? Math.min((time / finishTime) * 100, 100)
@@ -123,35 +115,23 @@ const TimerControl = ({
                 </Box>
             </Box>
 
-            {/* Controls — 2x2 grid */}
+            {/* Controls */}
             <Box sx={{
-                display: 'grid',
-                gridTemplateColumns: '1fr 1fr',
+                display: 'flex',
                 gap: 1.5,
+                justifyContent: 'center',
                 maxWidth: 280,
                 mx: 'auto',
             }}>
                 <Button
                     variant="contained"
-                    color="primary"
-                    onClick={onStart}
-                    disabled={isRunning}
-                    aria-label="タイマー開始"
-                    startIcon={<PlayArrowIcon />}
-                    sx={{ minHeight: 44 }}
+                    color={isRunning ? 'error' : 'primary'}
+                    onClick={onToggleRunning}
+                    aria-label={isRunning ? 'タイマー停止' : 'タイマー開始'}
+                    startIcon={isRunning ? <StopIcon /> : <PlayArrowIcon />}
+                    sx={{ minHeight: 44, flex: 1 }}
                 >
-                    スタート
-                </Button>
-                <Button
-                    variant="contained"
-                    color="error"
-                    onClick={onStop}
-                    disabled={!isRunning}
-                    aria-label="タイマー停止"
-                    startIcon={<StopIcon />}
-                    sx={{ minHeight: 44 }}
-                >
-                    ストップ
+                    {isRunning ? 'ストップ' : 'スタート'}
                 </Button>
                 <Button
                     variant="outlined"
@@ -160,22 +140,9 @@ const TimerControl = ({
                     disabled={isRunning || time === 0}
                     aria-label="タイマーリセット"
                     startIcon={<ReplayIcon />}
-                    sx={{ minHeight: 44, color: 'text.secondary' }}
+                    sx={{ minHeight: 44, flex: 1, color: 'text.secondary' }}
                 >
                     リセット
-                </Button>
-                <Button
-                    variant="outlined"
-                    color="inherit"
-                    onClick={onToggleSound}
-                    aria-label={soundEnabled ? '音声をオフにする' : '音声をオンにする'}
-                    startIcon={soundEnabled ? <VolumeUpIcon /> : <VolumeOffIcon />}
-                    sx={{
-                        minHeight: 44,
-                        color: soundEnabled ? 'primary.main' : 'text.disabled',
-                    }}
-                >
-                    {soundEnabled ? '通知オン' : '通知オフ'}
                 </Button>
             </Box>
         </Box>

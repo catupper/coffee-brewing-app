@@ -6,6 +6,8 @@ import DarkModeIcon from '@mui/icons-material/DarkMode';
 import LightModeIcon from '@mui/icons-material/LightMode';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ExpandLessIcon from '@mui/icons-material/ExpandLess';
+import VolumeUpIcon from '@mui/icons-material/VolumeUp';
+import VolumeOffIcon from '@mui/icons-material/VolumeOff';
 import { useColorScheme } from '@mui/material/styles';
 import {
     calculateBrewingSteps,
@@ -165,14 +167,24 @@ const App = () => {
                             4:6
                         </Typography>
                     </Box>
-                    <IconButton
-                        onClick={toggleColorMode}
-                        size="small"
-                        aria-label={mode === 'dark' ? 'ライトモードに切り替え' : 'ダークモードに切り替え'}
-                        sx={{ color: 'text.secondary' }}
-                    >
-                        {mode === 'dark' ? <LightModeIcon fontSize="small" /> : <DarkModeIcon fontSize="small" />}
-                    </IconButton>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                        <IconButton
+                            onClick={() => setSoundEnabled(!soundEnabled)}
+                            size="small"
+                            aria-label={soundEnabled ? '通知音をオフにする' : '通知音をオンにする'}
+                            sx={{ color: soundEnabled ? 'primary.main' : 'text.disabled' }}
+                        >
+                            {soundEnabled ? <VolumeUpIcon fontSize="small" /> : <VolumeOffIcon fontSize="small" />}
+                        </IconButton>
+                        <IconButton
+                            onClick={toggleColorMode}
+                            size="small"
+                            aria-label={mode === 'dark' ? 'ライトモードに切り替え' : 'ダークモードに切り替え'}
+                            sx={{ color: 'text.secondary' }}
+                        >
+                            {mode === 'dark' ? <LightModeIcon fontSize="small" /> : <DarkModeIcon fontSize="small" />}
+                        </IconButton>
+                    </Box>
                 </Box>
 
                 {/* Tips */}
@@ -264,14 +276,11 @@ const App = () => {
                         <TimerControl
                             time={time}
                             isRunning={isRunning}
-                            soundEnabled={soundEnabled}
                             currentStepIndex={currentStepIndex}
                             totalSteps={brewingSteps.length}
                             finishTime={finishTime}
-                            onStart={() => setIsRunning(true)}
-                            onStop={() => setIsRunning(false)}
+                            onToggleRunning={() => setIsRunning(!isRunning)}
                             onReset={resetTimer}
-                            onToggleSound={() => setSoundEnabled(!soundEnabled)}
                         />
                     </CardContent>
                 </Card>
