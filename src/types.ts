@@ -93,19 +93,34 @@ export const formatTime = (seconds: number): string => {
     return `${String(minutes).padStart(1, '0')}分${String(remainingSeconds).padStart(2, '0')}秒`;
 };
 
-export const playBeep = (frequency: number = 440, duration: number = 200) => {
+let audioContext: AudioContext | null = null;
+
+const getAudioContext = (): AudioContext | null => {
     try {
-        const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
-        const oscillator = audioContext.createOscillator();
-        const gainNode = audioContext.createGain();
+        if (!audioContext || audioContext.state === 'closed') {
+            audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+        }
+        return audioContext;
+    } catch (e) {
+        console.warn('Web Audio API is not supported:', e);
+        return null;
+    }
+};
+
+export const playBeep = (frequency: number = 440, duration: number = 200) => {
+    const ctx = getAudioContext();
+    if (!ctx) return;
+    try {
+        const oscillator = ctx.createOscillator();
+        const gainNode = ctx.createGain();
         oscillator.connect(gainNode);
-        gainNode.connect(audioContext.destination);
+        gainNode.connect(ctx.destination);
         oscillator.frequency.value = frequency;
         oscillator.type = 'sine';
         gainNode.gain.value = 0.3;
         oscillator.start();
-        oscillator.stop(audioContext.currentTime + duration / 1000);
+        oscillator.stop(ctx.currentTime + duration / 1000);
     } catch (e) {
-        // Audio not supported
+        console.warn('Beep playback failed:', e);
     }
 };
