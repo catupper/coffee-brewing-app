@@ -153,48 +153,26 @@ const App = () => {
         }}>
             <Container maxWidth="sm">
                 {/* Header */}
-                <Box sx={{ textAlign: 'center', mb: 3 }}>
-                    <Box sx={{
-                        display: 'flex',
-                        justifyContent: 'flex-end',
-                        mb: 1,
-                    }}>
-                        <IconButton
-                            onClick={toggleColorMode}
-                            aria-label={mode === 'dark' ? 'ライトモードに切り替え' : 'ダークモードに切り替え'}
-                            sx={{
-                                color: 'text.secondary',
-                                transition: 'transform 0.3s ease',
-                                '&:hover': { transform: 'rotate(30deg)' },
-                            }}
-                        >
-                            {mode === 'dark' ? <LightModeIcon /> : <DarkModeIcon />}
-                        </IconButton>
-                    </Box>
-                    <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 1.5, mb: 0.5 }}>
-                        <LocalCafeIcon sx={{ fontSize: 36, color: 'primary.main' }} />
-                        <Typography
-                            variant="h4"
-                            sx={{
-                                color: 'text.primary',
-                                display: 'flex',
-                                alignItems: 'baseline',
-                                gap: 1,
-                            }}
-                        >
-                            <Box component="span" sx={{
-                                fontSize: '2.2rem',
-                                fontWeight: 800,
-                                color: 'primary.main',
-                            }}>
-                                4:6
-                            </Box>
-                            コーヒー抽出ガイド
+                <Box sx={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    mb: 2,
+                }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
+                        <LocalCafeIcon sx={{ fontSize: 22, color: 'primary.main' }} />
+                        <Typography variant="subtitle1" sx={{ fontWeight: 700, color: 'primary.main', lineHeight: 1 }}>
+                            4:6
                         </Typography>
                     </Box>
-                    <Typography variant="body2" color="text.secondary">
-                        粕谷哲メソッド
-                    </Typography>
+                    <IconButton
+                        onClick={toggleColorMode}
+                        size="small"
+                        aria-label={mode === 'dark' ? 'ライトモードに切り替え' : 'ダークモードに切り替え'}
+                        sx={{ color: 'text.secondary' }}
+                    >
+                        {mode === 'dark' ? <LightModeIcon fontSize="small" /> : <DarkModeIcon fontSize="small" />}
+                    </IconButton>
                 </Box>
 
                 {/* Tips */}
