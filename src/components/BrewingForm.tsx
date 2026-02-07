@@ -19,6 +19,13 @@ interface BrewingFormProps {
     onToggleLink: () => void;
 }
 
+const validateAmount = (value: string, label: string): string => {
+    const num = parseFloat(value);
+    if (value === '' || isNaN(num)) return `${label}を入力してください`;
+    if (num <= 0) return `${label}は0より大きい値にしてください`;
+    return '';
+};
+
 const BrewingForm = ({
     coffeeAmount,
     waterAmount,
@@ -32,6 +39,9 @@ const BrewingForm = ({
     onStrengthChange,
     onToggleLink,
 }: BrewingFormProps) => {
+    const coffeeError = validateAmount(coffeeAmount, '豆の量');
+    const waterError = validateAmount(waterAmount, 'お湯の量');
+
     return (
         <form style={{ marginBottom: '20px' }} onSubmit={(e) => e.preventDefault()}>
             <Box sx={{
@@ -48,17 +58,24 @@ const BrewingForm = ({
                     fullWidth
                     margin="normal"
                     required
+                    error={!!coffeeError}
+                    helperText={coffeeError}
                     inputProps={{ min: 1 }}
                 />
-                <Tooltip title={isLinked ? `比率固定中 (1:${ratio.toFixed(1)})` : '比率固定なし'}>
-                    <IconButton
-                        onClick={onToggleLink}
-                        aria-label={isLinked ? '比率固定を解除' : '比率を固定'}
-                        sx={{ minWidth: 48, minHeight: 48 }}
-                    >
-                        {isLinked ? <LinkIcon /> : <LinkOffIcon />}
-                    </IconButton>
-                </Tooltip>
+                <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', flexShrink: 0 }}>
+                    <Tooltip title={isLinked ? `比率固定中 (1:${ratio.toFixed(1)})` : '比率固定なし'}>
+                        <IconButton
+                            onClick={onToggleLink}
+                            aria-label={isLinked ? '比率固定を解除' : '比率を固定'}
+                            sx={{ minWidth: 48, minHeight: 48 }}
+                        >
+                            {isLinked ? <LinkIcon /> : <LinkOffIcon />}
+                        </IconButton>
+                    </Tooltip>
+                    <Typography variant="caption" color="text.secondary" sx={{ lineHeight: 1, whiteSpace: 'nowrap' }}>
+                        {isLinked ? `1:${ratio.toFixed(1)}` : '固定なし'}
+                    </Typography>
+                </Box>
                 <TextField
                     label="お湯の量 (ml)"
                     type="number"
@@ -67,6 +84,8 @@ const BrewingForm = ({
                     fullWidth
                     margin="normal"
                     required
+                    error={!!waterError}
+                    helperText={waterError}
                     inputProps={{ min: 1 }}
                 />
             </Box>

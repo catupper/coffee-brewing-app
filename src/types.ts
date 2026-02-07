@@ -10,8 +10,8 @@ export type Strength = '標準' | '濃いめ' | '薄め';
 
 // --- 色定数 ---
 export const COLORS = {
-    currentStep: '#f5e642',
-    completedStep: '#d3d3d3',
+    currentStep: '#fff3cd',
+    completedStep: '#e8e8e8',
     finishStep: '#a5d6a7',
     containerBg: '#f9f9f9',
 } as const;

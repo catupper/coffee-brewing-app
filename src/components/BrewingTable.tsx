@@ -7,8 +7,32 @@ interface BrewingTableProps {
     currentTime: number;
 }
 
+type StepStatus = 'current' | 'completed' | 'pending';
+
+const getStepStatus = (currentTime: number, stepTime: number, nextStepTime: number): StepStatus => {
+    if (currentTime >= stepTime && currentTime < nextStepTime) return 'current';
+    if (currentTime >= nextStepTime) return 'completed';
+    return 'pending';
+};
+
+const stepStyles: Record<StepStatus, { backgroundColor: string; fontWeight: string }> = {
+    current: { backgroundColor: COLORS.currentStep, fontWeight: 'bold' },
+    completed: { backgroundColor: COLORS.completedStep, fontWeight: 'normal' },
+    pending: { backgroundColor: 'transparent', fontWeight: 'normal' },
+};
+
+const stepPrefix: Record<StepStatus, string> = {
+    current: '▶ ',
+    completed: '✓ ',
+    pending: '',
+};
+
 const BrewingTable = ({ brewingSteps, currentTime }: BrewingTableProps) => {
     if (brewingSteps.length === 0) return null;
+
+    const finishTime = brewingSteps[brewingSteps.length - 1].time + STEP_INTERVAL_SECONDS;
+    const isFinished = currentTime >= finishTime;
+
     return (
         <TableContainer component={Paper}>
             <Table>
@@ -21,40 +45,36 @@ const BrewingTable = ({ brewingSteps, currentTime }: BrewingTableProps) => {
                 </TableHead>
                 <TableBody>
                     {brewingSteps.map((step, index) => {
-                        const nextStepTime = brewingSteps[index + 1]?.time || Infinity;
+                        const nextStepTime = brewingSteps[index + 1]?.time ?? finishTime;
+                        const status = getStepStatus(currentTime, step.time, nextStepTime);
+                        const style = stepStyles[status];
                         return (
                             <TableRow
                                 key={index}
-                                sx={{
-                                    backgroundColor:
-                                        currentTime >= step.time && currentTime < nextStepTime
-                                            ? COLORS.currentStep
-                                            : currentTime > step.time
-                                                ? COLORS.completedStep
-                                                : 'transparent',
-                                }}
+                                sx={{ backgroundColor: style.backgroundColor }}
                             >
-                                <TableCell align="center" sx={{ fontSize: '1.1rem' }}>
-                                    {currentTime >= step.time && currentTime < nextStepTime ? '▶ ' : ''}{formatTime(step.time)}
+                                <TableCell align="center" sx={{ fontSize: '1.1rem', fontWeight: style.fontWeight }}>
+                                    {stepPrefix[status]}{formatTime(step.time)}
                                 </TableCell>
-                                <TableCell align="center" sx={{ fontSize: '1.1rem' }}>{step.amount}ml</TableCell>
-                                <TableCell align="center" sx={{ fontSize: '1.1rem' }}>{step.total}ml</TableCell>
+                                <TableCell align="center" sx={{ fontSize: '1.1rem', fontWeight: style.fontWeight }}>
+                                    {step.amount}ml
+                                </TableCell>
+                                <TableCell align="center" sx={{ fontSize: '1.1rem', fontWeight: style.fontWeight }}>
+                                    {step.total}ml
+                                </TableCell>
                             </TableRow>
                         );
                     })}
-                    {brewingSteps.length > 0 && (
-                        <TableRow sx={{
-                            backgroundColor: currentTime >= brewingSteps[brewingSteps.length - 1].time + STEP_INTERVAL_SECONDS ? COLORS.finishStep : 'transparent'
-                        }}>
-                            <TableCell align="center" sx={{ fontSize: '1.1rem' }}>
-                                {currentTime >= brewingSteps[brewingSteps.length - 1].time + STEP_INTERVAL_SECONDS ? '▶ ' : ''}
-                                {formatTime(brewingSteps[brewingSteps.length - 1].time + STEP_INTERVAL_SECONDS)}
-                            </TableCell>
-                            <TableCell align="center" sx={{ fontSize: '1.1rem' }} colSpan={2}>
-                                ドリッパーを外す
-                            </TableCell>
-                        </TableRow>
-                    )}
+                    <TableRow sx={{
+                        backgroundColor: isFinished ? COLORS.finishStep : 'transparent',
+                    }}>
+                        <TableCell align="center" sx={{ fontSize: '1.1rem', fontWeight: isFinished ? 'bold' : 'normal' }}>
+                            {isFinished ? '▶ ' : ''}{formatTime(finishTime)}
+                        </TableCell>
+                        <TableCell align="center" sx={{ fontSize: '1.1rem', fontWeight: isFinished ? 'bold' : 'normal' }} colSpan={2}>
+                            ドリッパーを外す
+                        </TableCell>
+                    </TableRow>
                 </TableBody>
             </Table>
         </TableContainer>
