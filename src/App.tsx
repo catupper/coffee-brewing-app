@@ -1,9 +1,11 @@
 import { useState, useEffect, useMemo, useRef, useCallback } from 'react';
-import { Container, Typography, Alert, Card, CardContent, IconButton, Fade, Grow } from '@mui/material';
+import { Container, Typography, Alert, Card, CardContent, IconButton, Fade, Grow, Collapse, Chip } from '@mui/material';
 import Box from '@mui/material/Box';
 import LocalCafeIcon from '@mui/icons-material/LocalCafe';
 import DarkModeIcon from '@mui/icons-material/DarkMode';
 import LightModeIcon from '@mui/icons-material/LightMode';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import ExpandLessIcon from '@mui/icons-material/ExpandLess';
 import { useColorScheme } from '@mui/material/styles';
 import {
     calculateBrewingSteps,
@@ -31,6 +33,13 @@ const App = () => {
     const [time, setTime] = useState(0);
     const [isRunning, setIsRunning] = useState(false);
     const [soundEnabled, setSoundEnabled] = useState(true);
+    const [formExpanded, setFormExpanded] = useState(true);
+
+    const timerActive = isRunning || time > 0;
+
+    useEffect(() => {
+        if (isRunning) setFormExpanded(false);
+    }, [isRunning]);
 
     const ratio = useMemo(() => {
         const coffee = parseFloat(coffeeAmount);
@@ -194,22 +203,67 @@ const App = () => {
                 </Box>
 
                 {/* Form */}
-                <Card sx={{ mb: 2.5, bgcolor: 'background.paper' }}>
-                    <CardContent sx={{ p: { xs: 2, sm: 3 }, '&:last-child': { pb: { xs: 2, sm: 3 } } }}>
-                        <BrewingForm
-                            coffeeAmount={coffeeAmount}
-                            waterAmount={waterAmount}
-                            flavor={flavor}
-                            strength={strength}
-                            isLinked={isLinked}
-                            ratio={ratio}
-                            onCoffeeAmountChange={handleCoffeeAmountChange}
-                            onWaterAmountChange={handleWaterAmountChange}
-                            onFlavorChange={setFlavor}
-                            onStrengthChange={setStrength}
-                            onToggleLink={() => setIsLinked(!isLinked)}
-                        />
-                    </CardContent>
+                <Card sx={{ mb: 2.5, bgcolor: 'background.paper', overflow: 'hidden' }}>
+                    {/* Summary bar — always visible, clickable to toggle */}
+                    <Box
+                        onClick={() => setFormExpanded((v) => !v)}
+                        sx={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'space-between',
+                            px: { xs: 2, sm: 3 },
+                            py: 1.5,
+                            cursor: 'pointer',
+                            userSelect: 'none',
+                            '&:hover': { bgcolor: 'action.hover' },
+                            transition: 'background-color 0.15s ease',
+                        }}
+                        role="button"
+                        aria-expanded={formExpanded}
+                        aria-label="抽出設定の展開/折りたたみ"
+                    >
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexWrap: 'wrap', minWidth: 0 }}>
+                            <Typography variant="subtitle2" color="text.secondary" sx={{ flexShrink: 0 }}>
+                                設定
+                            </Typography>
+                            <Box sx={{ display: 'flex', gap: 0.75, flexWrap: 'wrap' }}>
+                                <Chip label={`${coffeeAmount}g / ${waterAmount}ml`} size="small" variant="outlined" />
+                                <Chip label={flavor} size="small" variant={flavor !== '標準' ? 'filled' : 'outlined'} color={flavor !== '標準' ? 'primary' : 'default'} />
+                                <Chip label={strength} size="small" variant={strength !== '標準' ? 'filled' : 'outlined'} color={strength !== '標準' ? 'primary' : 'default'} />
+                            </Box>
+                        </Box>
+                        <IconButton
+                            size="small"
+                            tabIndex={-1}
+                            sx={{ color: 'text.secondary', ml: 1, flexShrink: 0 }}
+                        >
+                            {formExpanded ? <ExpandLessIcon fontSize="small" /> : <ExpandMoreIcon fontSize="small" />}
+                        </IconButton>
+                    </Box>
+
+                    {/* Collapsible form body */}
+                    <Collapse in={formExpanded} timeout={250}>
+                        <CardContent sx={{
+                            px: { xs: 2, sm: 3 },
+                            pt: 0,
+                            pb: { xs: 2, sm: 3 },
+                            '&:last-child': { pb: { xs: 2, sm: 3 } },
+                        }}>
+                            <BrewingForm
+                                coffeeAmount={coffeeAmount}
+                                waterAmount={waterAmount}
+                                flavor={flavor}
+                                strength={strength}
+                                isLinked={isLinked}
+                                ratio={ratio}
+                                onCoffeeAmountChange={handleCoffeeAmountChange}
+                                onWaterAmountChange={handleWaterAmountChange}
+                                onFlavorChange={setFlavor}
+                                onStrengthChange={setStrength}
+                                onToggleLink={() => setIsLinked(!isLinked)}
+                            />
+                        </CardContent>
+                    </Collapse>
                 </Card>
 
                 {/* Completion Alert */}
