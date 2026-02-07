@@ -123,25 +123,14 @@ const TimerControl = ({
                 </Box>
             </Box>
 
-            {/* Controls */}
+            {/* Controls — 2x2 grid */}
             <Box sx={{
-                display: 'flex',
+                display: 'grid',
+                gridTemplateColumns: '1fr 1fr',
                 gap: 1.5,
-                justifyContent: 'center',
-                alignItems: 'center',
-                flexWrap: 'wrap',
+                maxWidth: 280,
+                mx: 'auto',
             }}>
-                <IconButton
-                    onClick={onToggleSound}
-                    aria-label={soundEnabled ? '音声をオフにする' : '音声をオンにする'}
-                    sx={{
-                        minWidth: 44,
-                        minHeight: 44,
-                        color: soundEnabled ? 'primary.main' : 'text.disabled',
-                    }}
-                >
-                    {soundEnabled ? <VolumeUpIcon /> : <VolumeOffIcon />}
-                </IconButton>
                 <Button
                     variant="contained"
                     color="primary"
@@ -149,7 +138,7 @@ const TimerControl = ({
                     disabled={isRunning}
                     aria-label="タイマー開始"
                     startIcon={<PlayArrowIcon />}
-                    sx={{ minHeight: 48, px: 3 }}
+                    sx={{ minHeight: 44 }}
                 >
                     スタート
                 </Button>
@@ -160,7 +149,7 @@ const TimerControl = ({
                     disabled={!isRunning}
                     aria-label="タイマー停止"
                     startIcon={<StopIcon />}
-                    sx={{ minHeight: 48, px: 3 }}
+                    sx={{ minHeight: 44 }}
                 >
                     ストップ
                 </Button>
@@ -171,9 +160,22 @@ const TimerControl = ({
                     disabled={isRunning || time === 0}
                     aria-label="タイマーリセット"
                     startIcon={<ReplayIcon />}
-                    sx={{ minHeight: 48, px: 3, color: 'text.secondary' }}
+                    sx={{ minHeight: 44, color: 'text.secondary' }}
                 >
                     リセット
+                </Button>
+                <Button
+                    variant="outlined"
+                    color="inherit"
+                    onClick={onToggleSound}
+                    aria-label={soundEnabled ? '音声をオフにする' : '音声をオンにする'}
+                    startIcon={soundEnabled ? <VolumeUpIcon /> : <VolumeOffIcon />}
+                    sx={{
+                        minHeight: 44,
+                        color: soundEnabled ? 'primary.main' : 'text.disabled',
+                    }}
+                >
+                    {soundEnabled ? '通知オン' : '通知オフ'}
                 </Button>
             </Box>
         </Box>
