@@ -1,9 +1,8 @@
-import { TextField, Typography, IconButton, ToggleButton, ToggleButtonGroup } from '@mui/material';
+import { TextField, Typography, IconButton, ToggleButton, ToggleButtonGroup, Tooltip } from '@mui/material';
 import Box from '@mui/material/Box';
 import InputAdornment from '@mui/material/InputAdornment';
 import LinkIcon from '@mui/icons-material/Link';
 import LinkOffIcon from '@mui/icons-material/LinkOff';
-import Tooltip from '@mui/material/Tooltip';
 import type { Flavor, Strength } from '../types';
 
 interface BrewingFormProps {
@@ -48,17 +47,17 @@ const BrewingForm = ({
             <Box sx={{
                 display: 'flex',
                 flexDirection: { xs: 'column', sm: 'row' },
-                alignItems: 'center',
+                alignItems: 'flex-start',
                 gap: 1,
-                mb: 3,
+                mb: 2,
             }}>
                 <TextField
-                    label="コーヒー豆の量"
+                    label="豆の量"
                     type="number"
                     value={coffeeAmount}
                     onChange={(e) => onCoffeeAmountChange(e.target.value)}
                     fullWidth
-                    margin="normal"
+                    margin="none"
                     required
                     error={!!coffeeError}
                     helperText={coffeeError}
@@ -66,42 +65,41 @@ const BrewingForm = ({
                     InputProps={{
                         endAdornment: <InputAdornment position="end">g</InputAdornment>,
                     }}
+                    size="small"
                 />
-                <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', flexShrink: 0 }}>
-                    <Tooltip title={isLinked ? `比率固定中 (1:${ratio.toFixed(1)})` : '比率固定なし'}>
-                        <IconButton
-                            onClick={onToggleLink}
-                            aria-label={isLinked ? '比率固定を解除' : '比率を固定'}
-                            sx={{
-                                minWidth: 48,
-                                minHeight: 48,
-                                color: isLinked ? 'primary.main' : 'text.secondary',
-                                bgcolor: isLinked ? 'action.selected' : 'transparent',
-                                borderRadius: 2,
-                                transition: 'all 0.2s ease',
-                            }}
-                        >
-                            {isLinked ? <LinkIcon /> : <LinkOffIcon />}
-                        </IconButton>
-                    </Tooltip>
-                    <Typography variant="caption" color="text.secondary" sx={{ lineHeight: 1, whiteSpace: 'nowrap', mt: 0.5 }}>
-                        {isLinked ? `1:${ratio.toFixed(1)}` : '固定なし'}
-                    </Typography>
-                </Box>
                 <TextField
                     label="お湯の量"
                     type="number"
                     value={waterAmount}
                     onChange={(e) => onWaterAmountChange(e.target.value)}
                     fullWidth
-                    margin="normal"
+                    margin="none"
                     required
                     error={!!waterError}
                     helperText={waterError}
                     inputProps={{ min: 1 }}
                     InputProps={{
+                        startAdornment: (
+                            <InputAdornment position="start" sx={{ mr: 0 }}>
+                                <Tooltip title={isLinked ? `比率固定中 (1:${ratio.toFixed(1)})` : '比率固定なし'}>
+                                    <IconButton
+                                        onClick={onToggleLink}
+                                        edge="start"
+                                        size="small"
+                                        aria-label={isLinked ? `比率固定を解除 (1:${ratio.toFixed(1)})` : '比率を固定'}
+                                        sx={{
+                                            color: isLinked ? 'primary.main' : 'text.disabled',
+                                            transition: 'color 0.2s ease',
+                                        }}
+                                    >
+                                        {isLinked ? <LinkIcon fontSize="small" /> : <LinkOffIcon fontSize="small" />}
+                                    </IconButton>
+                                </Tooltip>
+                            </InputAdornment>
+                        ),
                         endAdornment: <InputAdornment position="end">ml</InputAdornment>,
                     }}
+                    size="small"
                 />
             </Box>
 
